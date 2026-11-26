@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: agritrack-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agritrack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-agritrack_field}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - agritrack_pgdata:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agritrack} -d ${POSTGRES_DB:-agritrack_field}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  central-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agritrack-central-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      BACKEND_PORT: ${BACKEND_PORT:-3001}
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-agritrack}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      PGDATABASE: ${POSTGRES_DB:-agritrack_field}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      ADMIN_PASSCODE: ${ADMIN_PASSCODE:-}
+      GPS_RETENTION_DAYS: ${GPS_RETENTION_DAYS:-365}
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    volumes:
+      - ./.data:/app/.data
+
+volumes:
+  agritrack_pgdata:

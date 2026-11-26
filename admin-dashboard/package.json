@@ -1,0 +1,6 @@
+{
+  "name": "agritrack-admin-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Product 3: Administrative Web Dashboard (Scheduled for Phase 4). Communicates exclusively with central-backend APIs."
+}

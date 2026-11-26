@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">أجري تراك الميداني</string>
+    <string name="login_title">تسجيل دخول الموظف</string>
+    <string name="employee_id_label">معرف الموظف (مثال EMP-001)</string>
+    <string name="device_id_label">معرف الجهاز المخصص</string>
+    <string name="passcode_label">رمز الدخول</string>
+    <string name="sign_in_button">تسجيل الدخول</string>
+    <string name="sign_out_button">تسجيل الخروج</string>
+    <string name="start_session">بدء جلسة التتبع</string>
+    <string name="stop_session">إيقاف جلسة التتبع</string>
+    <string name="sync_now">مزامنة المعلق الآن</string>
+    <string name="pending_records_count">السجلات المعلقة محلياً: %1$d</string>
+    <string name="synced_records_count">السجلات المتزامنة: %1$d</string>
+    <string name="failed_records_count">مجدول لإعادة المحاولة: %1$d</string>
+    <string name="blocked_records_count">متوقف مؤقتاً (محفوظ محلياً): %1$d</string>
+    <string name="permanent_failed_records_count">سجلات مرفوضة (محفوظة محلياً): %1$d</string>
+    <string name="last_sync_error_label">ملاحظة المزامنة: %1$s</string>
+    <string name="session_active_label">الجلسة نشطة — يتم التقاط GPS كل 10 دقائق</string>
+    <string name="session_idle_label">الجلسة متوقفة — التتبع متوقف</string>
+    <string name="notification_channel_name">جلسة تتبع الموقع النشطة</string>
+    <string name="notification_title">تتبع GPS قيد التشغيل</string>
+    <string name="notification_body">يتم تسجيل الموقع كل 10 دقائق للموظف %1$s</string>
+    <string name="notification_gps_disabled">خدمة الموقع متوقفة — فعّل GPS لاستئناف التسجيل</string>
+</resources>

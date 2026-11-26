@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">AgriTrack Field</string>
+    <string name="login_title">Employee Sign-In</string>
+    <string name="employee_id_label">Employee ID (e.g. EMP-001)</string>
+    <string name="device_id_label">Assigned Device ID</string>
+    <string name="passcode_label">Passcode</string>
+    <string name="sign_in_button">Sign In</string>
+    <string name="sign_out_button">Sign Out</string>
+    <string name="start_session">Start Tracking Session</string>
+    <string name="stop_session">Stop Tracking Session</string>
+    <string name="sync_now">Sync Pending Now</string>
+    <string name="pending_records_count">Pending offline records: %1$d</string>
+    <string name="synced_records_count">Synchronized records: %1$d</string>
+    <string name="failed_records_count">Retry queued: %1$d</string>
+    <string name="blocked_records_count">Paused (preserved locally): %1$d</string>
+    <string name="permanent_failed_records_count">Rejected records (preserved): %1$d</string>
+    <string name="last_sync_error_label">Sync notice: %1$s</string>
+    <string name="session_active_label">Session ACTIVE — Capturing GPS every 10 min</string>
+    <string name="session_idle_label">Session IDLE — GPS capture paused</string>
+    <string name="notification_channel_name">Active GPS Work Session</string>
+    <string name="notification_title">AgriTrack GPS Tracking Active</string>
+    <string name="notification_body">Recording location every 10 min for %1$s</string>
+    <string name="notification_gps_disabled">Device Location is off — enable GPS to resume capture</string>
+</resources>

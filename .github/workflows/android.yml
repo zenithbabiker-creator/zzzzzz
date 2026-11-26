@@ -1,0 +1,134 @@
+name: Employee Android CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'employee-android/**'
+      - '.github/workflows/android.yml'
+  pull_request:
+    paths:
+      - 'employee-android/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+    inputs:
+      debug_api_url:
+        description: 'Optional override for AGRITRACK_DEBUG_API_URL (defaults to http://10.0.2.2:3001/)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-debug-apk:
+    name: Build & Verify employee-android (Debug APK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: employee-android
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK 35
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          accept-android-sdk-licenses: true
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+
+      - name: Set up Gradle 8.10.2
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          gradle-version: '8.10.2'
+          cache-provider: 'basic'
+          validate-wrappers: true
+
+      - name: Verify Gradle Wrapper configuration and bootstrap from official Gradle 8.10.2 if missing
+        run: |
+          EXPECTED_DIST_URL='https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip'
+          EXPECTED_DIST_SHA256='31c55713e40233a8303827ceb42ca48a47267a0ad4bab9177123121e71524c26'
+
+          if [ ! -f gradle/wrapper/gradle-wrapper.properties ]; then
+            echo "::error::Missing employee-android/gradle/wrapper/gradle-wrapper.properties"
+            exit 1
+          fi
+
+          if ! grep -Fxq "distributionUrl=$EXPECTED_DIST_URL" gradle/wrapper/gradle-wrapper.properties; then
+            echo "::error::Unexpected distributionUrl in gradle-wrapper.properties"
+            exit 1
+          fi
+
+          if ! grep -Fxq "validateDistributionUrl=true" gradle/wrapper/gradle-wrapper.properties; then
+            echo "::error::validateDistributionUrl=true must be enabled in gradle-wrapper.properties"
+            exit 1
+          fi
+
+          if [ ! -f ./gradlew ] || [ ! -f ./gradlew.bat ] || [ ! -f ./gradle/wrapper/gradle-wrapper.jar ]; then
+            echo "Repository wrapper files incomplete (gradlew, gradlew.bat, or gradle-wrapper.jar missing)."
+            echo "Bootstrapping wrapper locally from official Gradle 8.10.2 distribution with verified SHA-256..."
+            gradle wrapper \
+              --gradle-version 8.10.2 \
+              --gradle-distribution-sha256-sum "$EXPECTED_DIST_SHA256" \
+              --no-daemon
+          fi
+
+          chmod +x ./gradlew
+          ./gradlew --version --no-daemon
+
+      - name: Run Android unit tests
+        run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Run Android lint
+        run: ./gradlew :app:lintDebug --no-daemon --stacktrace
+
+      - name: Build Debug APK
+        env:
+          INPUT_DEBUG_API_URL: ${{ inputs.debug_api_url }}
+        run: |
+          if [ -n "$INPUT_DEBUG_API_URL" ]; then
+            ./gradlew :app:assembleDebug "-PAGRITRACK_DEBUG_API_URL=$INPUT_DEBUG_API_URL" --no-daemon --stacktrace
+          else
+            ./gradlew :app:assembleDebug --no-daemon --stacktrace
+          fi
+
+      - name: Verify Debug APK output exists
+        run: |
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/*.apk
+
+      - name: Upload Android test and lint reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: agritrack-employee-android-reports
+          path: |
+            employee-android/app/build/reports/lint-results-debug.html
+            employee-android/app/build/reports/lint-results-debug.xml
+            employee-android/app/build/reports/tests/testDebugUnitTest/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload Debug APK artifact
+        if: success()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: agritrack-employee-debug-apk
+          path: employee-android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30

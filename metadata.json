@@ -1,0 +1,6 @@
+{
+  "name": "AgriTrack Field",
+  "description": "Bilingual offline-first GPS field employee tracking system (Phase 1) with local persistent storage, 10-minute session capture, and Android Kotlin source export.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
